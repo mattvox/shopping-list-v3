@@ -28,7 +28,6 @@ describe('Shopping List', function() {
         });
     });
     
-    //console.log(mongoose, "logging Item");
 // Successes
     it('should list items on GET', function(done) {
         chai.request(app)
@@ -63,13 +62,6 @@ describe('Shopping List', function() {
                 res.body.should.have.property('_id');
                 res.body.name.should.be.a('string');
                 res.body.name.should.equal('Kale');
-//                storage.items.should.be.a('array');
-//                storage.items.should.have.length(4);
-//                storage.items[3].should.be.a('object');
-//                storage.items[3].should.have.property('_id');
-//                storage.items[3].should.have.property('name');
-//                storage.items[3].name.should.be.a('string');
-//                storage.items[3].name.should.equal('Kale');
                 done();
             });
     });
@@ -81,16 +73,17 @@ describe('Shopping List', function() {
                 chai.request(app)
                 .put('/items/' + res.body[0]._id)
                 .send({'name': 'Changed'})
+                .end(function(err, res){
                     should.equal(err, null);
                     res.should.have.status(200);
                     res.should.be.json;
-                    res.body.should.be.a('array');
-                    res.body[0].should.be.a('object');
-                    res.body[0].should.have.property('name');
-                    res.body[0].should.have.property('_id');
-                    res.body[0].name.should.be.a('string');
-                    //res.body[0].name.should.equal('Changed');
-                done();
+                    res.body.should.be.a('object');
+                    res.body.should.have.property('name');
+                    res.body.should.have.property('_id');
+                    res.body.name.should.be.a('string');
+                    res.body.name.should.equal('Changed');
+                    done();
+                })
         });
     });
     
@@ -98,21 +91,15 @@ describe('Shopping List', function() {
     it('should delete an item on DELETE', function(done) {
         chai.request(app)
             .get('/items')
-            .end(function(err, res) {
+            .end(function(err, res) {    
                 chai.request(app)
                 .delete('/items/' + res.body[2]._id)
-                should.equal(err, null);
-                res.should.have.status(200);
-                res.should.be.json;
-//                storage.items.should.be.a('array');
-//                storage.items.should.have.length(3);
-//                storage.items[2].should.be.a('object');
-//                storage.items[2].should.have.property('id');
-//                storage.items[2].should.have.property('name');
-//                storage.items[2].id.should.be.a('number');
-//                storage.items[2].name.should.be.a('string');
-//                storage.items[2].name.should.equal('Kale');
-                done();
+                .end(function(err, res) {
+                    should.equal(err, null);
+                    res.should.have.status(200);
+                    res.should.be.json;
+                    done();
+                })
             });
     });
     
@@ -128,62 +115,59 @@ describe('Shopping List', function() {
         })
     })
     
-//    it('should FAIL PUT if you send an empty body without name', function(done) {
-//        chai.request(app)
-//            .put('/items/1')
-//            .send({})
-//            .end(function(err, res) {
-//                res.should.have.status(403);
-//                done();
-//        });
-//    })
+    it('should FAIL PUT if you send an empty body without name', function(done) {
+        chai.request(app)
+            .get('/items')
+            .end(function(err, res) {
+                chai.request(app)
+                .put('/items/' + res.body[0]._id)
+                .send({})
+                .end(function(err, res){
+                    res.should.have.status(500);
+                    done();
+                })
+        });
+    })
     
-//    it('should FAIL PUT to an ID that does not exist', function(done) {
-//        chai.request(app)
-//            .put('/items/jkhdsfgghjkdf')
-//            .send({'name': 'Does Not Exist'})
-//            .end(function(err, res) {
-//                res.should.be.json;
-//                res.should.have.status(403);
-//                done();
-//        })
-//    })
+    it('should FAIL PUT to an ID that does not exist', function(done) {
+        chai.request(app)
+            .put('/items/jkhdsfgghjkdf')
+            .send({'name': 'Does Not Exist'})
+            .end(function(err, res) {
+                res.should.be.json;
+                res.should.have.status(500);
+                done();
+        })
+    })
     
-//    it('should FAIL PUT if you try to edit item without an ID as endpoint', function(done) {
-//        chai.request(app)
-//            .put('/items/')
-//            .send({'name': 'Changed'})
-//            .end(function(err, res) {
-//                res.should.be.json;
-//                res.body.message.should.equal("Sorry, not a supported endpoint");
-//                res.should.have.status(403);
-//                done();
-//        });
-//    })
+    it('should FAIL PUT if you try to edit item without an ID as endpoint', function(done) {
+        chai.request(app)
+            .put('/items/')
+            .send({'name': 'Changed'})
+            .end(function(err, res) {
+                res.should.be.json;
+                res.body.message.should.equal('Not Found');
+                res.should.have.status(404);
+                done();
+        });
+    })
     
-//    it('should FAIL PUT without body data', function(done) {
-//        chai.request(app)
-//            .put('/items/1')
-//            .send({})
-//            .end(function(err, res) {
-//                res.should.be.json;
-//                res.body.status.should.equal("Bad request");
-//                res.should.have.status(403);
-//                done();
-//        });
-//    })
-    
-//    it('should FAIL PUT without valid JSON', function(done) {
-//        chai.request(app)
-//            .put('/items/1')
-//            .send("This is not valid JSON")
-//            .end(function(err, res) {
-//                res.should.be.json;
-//                res.body.status.should.equal("Bad request");
-//                res.should.have.status(403);
-//                done();
-//        });
-//    })
+    it('should FAIL PUT without valid JSON', function(done) {
+        chai.request(app)
+            .get('/items')
+            .end(function(err, res) {
+                chai.request(app)
+                .put('/items/' + res.body[1]._id)
+                .send("This is not valid JSON")
+                .end(function(err, res) {
+                    res.should.be.json;
+                    res.body.message.should.equal("Internal Server Error");
+                    res.should.have.status(500);
+                    done();
+                });
+            })
+            
+    })
     
     it('should FAIL DELETE if you try to delete an ID that does not exist', function(done) {
         chai.request(app)
